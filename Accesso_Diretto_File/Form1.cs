@@ -31,7 +31,7 @@ namespace Accesso_Diretto_File
             BinaryWriter File = new BinaryWriter(Percorso_File);
 
             // Creo riga con dati vuoti
-            Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(3);
+            Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(32) + Dati_Vuoto.PadRight(31);
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
@@ -80,7 +80,7 @@ namespace Accesso_Diretto_File
                     Prezzo = int.Parse(Prezzo_Prodotto.Text);
 
                     // Conversione in binario dei dati
-                    Riga = '|' + Nome.PadRight(30) + Prezzo.ToString().PadRight(30) + "1".PadRight(3);
+                    Riga = '|' + Nome.PadRight(32) + Prezzo.ToString().PadRight(31);
                     Riga_Binario = Encoding.Default.GetBytes(Riga);
 
                     // Inserimento nel file
