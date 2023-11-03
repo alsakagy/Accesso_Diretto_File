@@ -19,9 +19,9 @@ namespace Accesso_Diretto_File
         string Nome;
         string Riga;
         string Riga_Vuoto;
+        string File_Record = "Record.txt";
         byte[] Riga_Binario;
         int Prezzo;
-        int Numero_Record;
         int Lunghezza_Record = 64;
 
         FileStream Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -79,6 +79,11 @@ namespace Accesso_Diretto_File
                     Nome = Nome_Prodotto.Text;
                     Prezzo = int.Parse(Prezzo_Prodotto.Text);
 
+                    // Inserimento nel file 
+                    StreamWriter Stream = new StreamWriter(File_Record, true);
+                    Stream.Write($"{Nome};{i}\n");
+                    Stream.Close();
+
                     // Conversione in binario dei dati
                     Riga = '|' + Nome.PadRight(32) + Prezzo.ToString().PadRight(31);
                     Riga_Binario = Encoding.Default.GetBytes(Riga);
@@ -90,8 +95,13 @@ namespace Accesso_Diretto_File
                 }
             }
 
+            // Chiudo Writer e reader
             File_w.Close();
             File_r.Close();
+
+            // Svuoto caselle di testo nel form
+            Nome_Prodotto.Text = "";
+            Prezzo_Prodotto.Text = "";
         }
 
         private void Resetta_File_Click(object sender, EventArgs e)
