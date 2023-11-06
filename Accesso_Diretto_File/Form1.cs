@@ -24,12 +24,12 @@ namespace Accesso_Diretto_File
         int Prezzo;
         int Lunghezza_Record = 64;
 
-        FileStream Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        static void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
+        // Dichiaro il Writer, reader e FileStream
+        FileStream Percorso_File;
+        BinaryWriter File_W;
+        BinaryReader File_R;
+        public void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
         {
-            // apro il Writer
-            BinaryWriter File = new BinaryWriter(Percorso_File);
-
             // Creo riga con dati vuoti
             Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(32) + Dati_Vuoto.PadRight(31);
             // Trasformo riga in binario
@@ -37,11 +37,8 @@ namespace Accesso_Diretto_File
             // Stampo 100 righe nel file
             for (int i = 1; i <= 100; i++)
             {
-                File.Write(Riga_Binario);
+                File_W.Write(Riga_Binario);
             }
-
-            // chiudo il Writer
-            File.Close();
         }
         public Form1()
         {
@@ -59,20 +56,16 @@ namespace Accesso_Diretto_File
 
         private void Aggiungi_Click(object sender, EventArgs e)
         {
-            // Apertura Writer e Reader
-            BinaryReader File_r = new BinaryReader(Percorso_File);
-            BinaryWriter File_w = new BinaryWriter(Percorso_File);
-
             // Array per il record letto 
             byte[] Leggi_Record;
             // Gira per il numero di record fino a che non trova un record vuoto
             for(int i = 1; i <= 100; i++)
             {
                 // Leggi il record i + 1
-                File_r.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+                File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
 
                 // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
-                Leggi_Record = File_r.ReadBytes(31);
+                Leggi_Record = File_R.ReadBytes(31);
                 if (Leggi_Record[1] == '@')
                 {
                     // Inserimento dati nelle variabili
@@ -89,16 +82,11 @@ namespace Accesso_Diretto_File
                     Riga_Binario = Encoding.Default.GetBytes(Riga);
 
                     // Inserimento nel file
-                    File_w.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
-                    File_w.Write(Riga_Binario);
+                    File_W.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+                    File_W.Write(Riga_Binario);
                     break;
                 }
             }
-
-            // Chiudo Writer e reader
-            File_w.Close();
-            File_r.Close();
-
             // Svuoto caselle di testo nel form
             Nome_Prodotto.Text = "";
             Prezzo_Prodotto.Text = "";
@@ -107,6 +95,14 @@ namespace Accesso_Diretto_File
         private void Resetta_File_Click(object sender, EventArgs e)
         {
             Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            // apro il Writer e reader
+            File_W = new BinaryWriter(Percorso_File);
+            File_R = new BinaryReader(Percorso_File);
         }
     }
 }
