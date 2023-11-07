@@ -32,7 +32,8 @@ namespace Accesso_Diretto_File
         int Prezzo;
         int Lunghezza_Record = 64;
 
-        // Dichiaro il Writer, reader e FileStream
+        // Dichiaro il Writer, reader, FileStream e il File Indici
+        string Percorso_File_2;
         FileStream Percorso_File;
         BinaryWriter File_W;
         BinaryReader File_R;
@@ -55,8 +56,15 @@ namespace Accesso_Diretto_File
             File_W = new BinaryWriter(Percorso_File);
             File_R = new BinaryReader(Percorso_File);
 
-            // Apertura reader
-            string Percorso_File_2 = "Indici.txt";
+            // Percorso file Indici
+            Percorso_File_2 = Directory.GetCurrentDirectory() + "\\Indirizzi.txt";
+
+            // Se file non esiste lo crea nuovo e poi lo apre in reader
+            if (!File.Exists(Percorso_File_2))
+            {
+                File.Create(Percorso_File_2);
+            }
+
             StreamReader File_Indici_R = new StreamReader(Percorso_File_2);
 
             // Lettura dati
@@ -80,9 +88,12 @@ namespace Accesso_Diretto_File
             /* Utilizzo la dimensione del file per capire se è vuoto
             - nel caso dimesione e zero riempio il file con un contenuto vuoto (le chiocciole)
             _ nel caso dimensione diversa da zero il file è già pieno */
-            if (Info.Length == 0)
+            if (Info.Length == 0 || File.Exists("Prodotti.dat") == false)
             {
                 Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File.Delete(Percorso_File_2);
+                File.Create(Percorso_File_2);
+                MessageBox.Show("Attenzione: il file dei prodotti è stato cancellato o non esiste, per evitare errori è stato resettato anche il file contenente gli indici");
             }
         }
 
