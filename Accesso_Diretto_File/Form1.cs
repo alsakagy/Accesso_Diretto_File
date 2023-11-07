@@ -14,7 +14,15 @@ namespace Accesso_Diretto_File
 {
     public partial class Form1 : Form
     {
+        // Struct 
+        public struct Dati
+        {
+            public string Nome;
+            public int Indice;
+        }
+
         // Dati Comuni
+        public Dati[] Indici; 
         string Dati_Vuoto = "@";
         string Nome;
         string Riga;
@@ -40,9 +48,33 @@ namespace Accesso_Diretto_File
                 File_W.Write(Riga_Binario);
             }
         }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            // Apro il Writer e reader
+            File_W = new BinaryWriter(Percorso_File);
+            File_R = new BinaryReader(Percorso_File);
+
+            // Apertura reader
+            string Percorso_File_2 = "Indici.txt";
+            StreamReader File_Indici_R = new StreamReader(Percorso_File_2);
+
+            // Lettura dati
+            string[] strings = File.ReadAllLines(Percorso_File_2);
+
+            // Ciclo for per inserimento dati nella struct
+            for(int i = 0; i < strings.Length; i++)
+            {
+                Indici[i].Nome = strings[i].Split(';')[0];
+                Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
+            }
+
+        }
         public Form1()
         {
             InitializeComponent();
+            // Dichiaro la struct
+            Indici = new Dati[100];
             // Metodo per la dimensione (in byte) del file
             FileInfo Info = new FileInfo("Prodotti.dat");
             /* Utilizzo la dimensione del file per capire se è vuoto
@@ -97,12 +129,27 @@ namespace Accesso_Diretto_File
             Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Ricerca_Prodotti_Click(object sender, EventArgs e)
         {
-            Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            // apro il Writer e reader
-            File_W = new BinaryWriter(Percorso_File);
-            File_R = new BinaryReader(Percorso_File);
+            if(Ricerca_NomeProdotto.Text == "" && Ricerca_NumeroProdotto.Text != "")
+            {
+                // Caso ricerca dal numero prodotto (non controllo errori di inserimento)
+            }
+            else if(Ricerca_NumeroProdotto.Text == "" && Ricerca_NomeProdotto.Text != "")
+            {
+                // Caso ricerca dal nome prodotto (non controllo errori di inserimento)
+            }
+            else
+            {
+                // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
+            }
         }
+        /* array di struct che contiene nome prodotto e numero prodotto 
+         * -ordinato per ricerca binaria
+         * -di 100 elementi perchè abbiamo 100 record
+         * -bisogna aver un numero per indicare quali sono gli elementi validi nei 100 dell'array
+         * -e poi si salva su file alla chiusura del file 
+         * -alla apertura si riempe di nuovo l'array di struct
+         */
     }
 }
