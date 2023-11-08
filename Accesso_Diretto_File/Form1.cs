@@ -29,7 +29,7 @@ namespace Accesso_Diretto_File
         string Riga_Vuoto;
         string File_Record = "Record.txt";
         byte[] Riga_Binario;
-        int Prezzo;
+        double Prezzo;
         int Lunghezza_Record = 64;
 
         // Dichiaro il Writer, reader, FileStream e il File Indici
@@ -40,7 +40,7 @@ namespace Accesso_Diretto_File
         public void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
         {
             // Creo riga con dati vuoti
-            Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(32) + Dati_Vuoto.PadRight(31);
+            Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
@@ -52,17 +52,32 @@ namespace Accesso_Diretto_File
         private void Form1_Load(object sender, EventArgs e)
         {
             Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            // Percorso file Indici
+            Percorso_File_2 = "Record.txt";
+
             // Apro il Writer e reader
             File_W = new BinaryWriter(Percorso_File);
             File_R = new BinaryReader(Percorso_File);
 
-            // Percorso file Indici
-            Percorso_File_2 = Directory.GetCurrentDirectory() + "\\Indirizzi.txt";
+            // Metodo per la dimensione (in byte) del file
+            FileInfo Info = new FileInfo("Prodotti.dat");
+            /* Utilizzo la dimensione del file per capire se è vuoto
+            - nel caso dimesione e zero riempio il file con un contenuto vuoto (le chiocciole)
+            _ nel caso dimensione diversa da zero il file è già pieno */
+            if (File.Exists("Prodotti.dat") == false || Info.Length == 0)
+            {
+                Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File.Delete(Percorso_File_2);
+                File.Create(Percorso_File_2);
+                MessageBox.Show("Attenzione: il file dei prodotti è stato cancellato o non esiste, per evitare errori è stato resettato anche il file contenente gli indici");
+            }
 
             // Se file non esiste lo crea nuovo e poi lo apre in reader
             if (!File.Exists(Percorso_File_2))
             {
                 File.Create(Percorso_File_2);
+                // aggiungere ricreazione della struct
             }
 
             StreamReader File_Indici_R = new StreamReader(Percorso_File_2);
@@ -83,52 +98,83 @@ namespace Accesso_Diretto_File
             InitializeComponent();
             // Dichiaro la struct
             Indici = new Dati[100];
-            // Metodo per la dimensione (in byte) del file
-            FileInfo Info = new FileInfo("Prodotti.dat");
-            /* Utilizzo la dimensione del file per capire se è vuoto
-            - nel caso dimesione e zero riempio il file con un contenuto vuoto (le chiocciole)
-            _ nel caso dimensione diversa da zero il file è già pieno */
-            if (Info.Length == 0 || File.Exists("Prodotti.dat") == false)
-            {
-                Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
-                File.Delete(Percorso_File_2);
-                File.Create(Percorso_File_2);
-                MessageBox.Show("Attenzione: il file dei prodotti è stato cancellato o non esiste, per evitare errori è stato resettato anche il file contenente gli indici");
-            }
         }
 
         private void Aggiungi_Click(object sender, EventArgs e)
         {
             // Array per il record letto 
             byte[] Leggi_Record;
+
+            // Variabili bool
+            bool C_Nome = false;
+            bool C_Vuoto = false;
+            int j = 0;
+            int k = 0;
+            int Quantità = 0;
+
             // Gira per il numero di record fino a che non trova un record vuoto
-            for(int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 100; i++)
             {
+                bool temp = true;
+                bool temp2 = true;
+
                 // Leggi il record i + 1
                 File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
 
+                // Inserimento dati nelle variabili
+                Nome = Nome_Prodotto.Text;
+                Prezzo = Convert.ToDouble(Prezzo_Prodotto.Text);
+
                 // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
-                Leggi_Record = File_R.ReadBytes(31);
-                if (Leggi_Record[1] == '@')
+                Leggi_Record = File_R.ReadBytes(64);
+
+                // Controllo se esistente o no nel file
+                if (Indici[i - 1].Nome == Nome)
                 {
-                    // Inserimento dati nelle variabili
-                    Nome = Nome_Prodotto.Text;
-                    Prezzo = int.Parse(Prezzo_Prodotto.Text);
-
-                    // Inserimento nel file 
-                    StreamWriter Stream = new StreamWriter(File_Record, true);
-                    Stream.Write($"{Nome};{i}\n");
-                    Stream.Close();
-
-                    // Conversione in binario dei dati
-                    Riga = '|' + Nome.PadRight(32) + Prezzo.ToString().PadRight(31);
-                    Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                    // Inserimento nel file
-                    File_W.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
-                    File_W.Write(Riga_Binario);
-                    break;
+                    C_Nome = true;
+                    if (temp)
+                    {
+                        j = i;
+                        temp = false;
+                        Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
+                    }
                 }
+                else if (Leggi_Record[1] == '@')
+                {
+                    C_Vuoto = true;
+                    if(temp2)
+                    {
+                        k = i;
+                        temp = false;
+                    }
+                }
+            }
+
+            // If di svolgimento aggiunta
+            if(C_Nome == true)
+            {
+                // Conversione in binario dei dati
+                Riga = $"{Quantità + 1}".PadRight(2);
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // Inserimento nel file
+                File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
+                File_W.Write(Riga_Binario);
+            }
+            else if(C_Vuoto == true && C_Nome == false)
+            {
+                // Inserimento nel file Indici
+                StreamWriter Stream = new StreamWriter(File_Record, true);
+                Stream.Write($"{Nome};{k}\n");
+                Stream.Close();
+
+                // Conversione in binario dei dati
+                Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // Inserimento nel file
+                File_W.BaseStream.Seek(((k) - 1) * Lunghezza_Record, 0);
+                File_W.Write(Riga_Binario);
             }
             // Svuoto caselle di testo nel form
             Nome_Prodotto.Text = "";

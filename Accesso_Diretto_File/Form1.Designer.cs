@@ -146,7 +146,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(523, 329);
+            this.label4.Location = new System.Drawing.Point(528, 329);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(270, 25);
             this.label4.TabIndex = 16;
@@ -154,7 +154,7 @@
             // 
             // Ricerca_NomeProdotto
             // 
-            this.Ricerca_NomeProdotto.Location = new System.Drawing.Point(538, 379);
+            this.Ricerca_NomeProdotto.Location = new System.Drawing.Point(543, 379);
             this.Ricerca_NomeProdotto.Name = "Ricerca_NomeProdotto";
             this.Ricerca_NomeProdotto.Size = new System.Drawing.Size(242, 20);
             this.Ricerca_NomeProdotto.TabIndex = 15;
@@ -174,7 +174,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(513, 418);
+            this.label5.Location = new System.Drawing.Point(518, 418);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(289, 25);
             this.label5.TabIndex = 18;
@@ -182,7 +182,7 @@
             // 
             // Ricerca_NumeroProdotto
             // 
-            this.Ricerca_NumeroProdotto.Location = new System.Drawing.Point(538, 462);
+            this.Ricerca_NumeroProdotto.Location = new System.Drawing.Point(543, 462);
             this.Ricerca_NumeroProdotto.Name = "Ricerca_NumeroProdotto";
             this.Ricerca_NumeroProdotto.Size = new System.Drawing.Size(242, 20);
             this.Ricerca_NumeroProdotto.TabIndex = 17;
