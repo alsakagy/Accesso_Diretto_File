@@ -58,7 +58,7 @@
             // 
             // Prezzo_Prodotto
             // 
-            this.Prezzo_Prodotto.Location = new System.Drawing.Point(196, 143);
+            this.Prezzo_Prodotto.Location = new System.Drawing.Point(197, 143);
             this.Prezzo_Prodotto.Name = "Prezzo_Prodotto";
             this.Prezzo_Prodotto.Size = new System.Drawing.Size(209, 20);
             this.Prezzo_Prodotto.TabIndex = 1;

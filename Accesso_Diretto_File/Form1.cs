@@ -44,7 +44,7 @@ namespace Accesso_Diretto_File
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= 64; i++)
             {
                 File_W.Write(Riga_Binario);
             }
@@ -103,7 +103,7 @@ namespace Accesso_Diretto_File
             bool temp2 = true;
 
             // Gira per il numero di record fino a che non trova un record vuoto
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i < 100; i++)
             {
                 // Leggi il record i + 1
                 File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
