@@ -33,10 +33,10 @@ namespace Accesso_Diretto_File
         int Lunghezza_Record = 64;
 
         // Dichiaro il Writer, reader, FileStream e il File Indici
-        string Percorso_File_2;
         FileStream Percorso_File;
         BinaryWriter File_W;
         BinaryReader File_R;
+
         public void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
         {
             // Creo riga con dati vuoti
@@ -53,9 +53,6 @@ namespace Accesso_Diretto_File
         {
             Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-            // Percorso file Indici
-            Percorso_File_2 = "Record.txt";
-
             // Apro il Writer e reader
             File_W = new BinaryWriter(Percorso_File);
             File_R = new BinaryReader(Percorso_File);
@@ -68,22 +65,13 @@ namespace Accesso_Diretto_File
             if (File.Exists("Prodotti.dat") == false || Info.Length == 0)
             {
                 Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
-                File.Delete(Percorso_File_2);
-                File.Create(Percorso_File_2);
+                File.Delete(File_Record);
+                File.Create(File_Record);
                 MessageBox.Show("Attenzione: il file dei prodotti è stato cancellato o non esiste, per evitare errori è stato resettato anche il file contenente gli indici");
             }
 
-            // Se file non esiste lo crea nuovo e poi lo apre in reader
-            if (!File.Exists(Percorso_File_2))
-            {
-                File.Create(Percorso_File_2);
-                // aggiungere ricreazione della struct
-            }
-
-            StreamReader File_Indici_R = new StreamReader(Percorso_File_2);
-
             // Lettura dati
-            string[] strings = File.ReadAllLines(Percorso_File_2);
+            string[] strings = File.ReadAllLines(File_Record);
 
             // Ciclo for per inserimento dati nella struct
             for(int i = 0; i < strings.Length; i++)
@@ -105,19 +93,18 @@ namespace Accesso_Diretto_File
             // Array per il record letto 
             byte[] Leggi_Record;
 
-            // Variabili bool
+            // Variabili bool e int
             bool C_Nome = false;
             bool C_Vuoto = false;
             int j = 0;
             int k = 0;
             int Quantità = 0;
+            bool temp1 = true;
+            bool temp2 = true;
 
             // Gira per il numero di record fino a che non trova un record vuoto
             for (int i = 1; i <= 100; i++)
             {
-                bool temp = true;
-                bool temp2 = true;
-
                 // Leggi il record i + 1
                 File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
 
@@ -132,12 +119,13 @@ namespace Accesso_Diretto_File
                 if (Indici[i - 1].Nome == Nome)
                 {
                     C_Nome = true;
-                    if (temp)
+                    if (temp1)
                     {
                         j = i;
-                        temp = false;
+                        temp1 = false;
                         Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
                     }
+                    break;
                 }
                 else if (Leggi_Record[1] == '@')
                 {
@@ -145,7 +133,7 @@ namespace Accesso_Diretto_File
                     if(temp2)
                     {
                         k = i;
-                        temp = false;
+                        temp2 = false;
                     }
                 }
             }
