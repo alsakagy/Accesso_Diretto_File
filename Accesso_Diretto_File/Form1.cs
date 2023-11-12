@@ -200,11 +200,15 @@ namespace Accesso_Diretto_File
                                 // Inserimento nel file
                                 File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
                                 File_W.Write(Riga_Binario);
+
+                                // Messaggio di risposta
+                                MessageBox.Show("hai inserito un prodotto che già esiste, è incrementata la quantità");
                             }
                             else if (C_Vuoto == true)
                             {
                                 int y = Numero_Prodotti;
 
+                                // Se ci sono zero elementi l'ho inserisce nel primo 'slot' della struct
                                 if(y == 0)
                                 {
                                     Indici[y].Nome = Nome;
@@ -212,9 +216,11 @@ namespace Accesso_Diretto_File
                                 }
                                 else
                                 {
+                                    // altrimenti confronta le stringhe fino a trovare la posizione corretta slittando tutti di uno
                                     bool Trovato = false;
                                     while (Trovato == false)
                                     {
+                                        // se dopo aver confrontato tutte le strighe la posizione corretta è zero entra qui
                                         if(y == 0)
                                         {
                                             Indici[y].Nome = Nome;
