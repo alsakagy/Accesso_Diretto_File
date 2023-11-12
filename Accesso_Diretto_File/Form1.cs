@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace Accesso_Diretto_File
 {
@@ -32,6 +34,7 @@ namespace Accesso_Diretto_File
         int Lunghezza_Record = 64;
         int Numero_Prodotti = 0;
         int Max_Record = 100;
+        bool Tasto_Modifica = false;
 
         // Dichiaro il Writer, reader, FileStream
         FileStream Percorso_File;
@@ -51,6 +54,33 @@ namespace Accesso_Diretto_File
                 Bw.Write(Riga_Binario);
             }
             Bw.Close();
+        }
+
+        public int Ricerca_Binaria(Dati[] array, string elemento)
+        {
+            int inizio = 0;
+            int fine = array.Length - 1;
+
+            while (inizio <= fine)
+            {
+                int medio = (inizio + fine) / 2;
+                string valoreMedio = array[medio].Nome;
+
+                if (valoreMedio == elemento)
+                {
+                    return medio;  // Elemento trovato, restituisci l'indice.
+                }
+                else if (valoreMedio.CompareTo(elemento) < 0)
+                {
+                    inizio = medio + 1;  // L'elemento è nella metà superiore.
+                }
+                else
+                {
+                    fine = medio - 1;  // L'elemento è nella metà inferiore.
+                }
+            }
+
+            return -1;  // Elemento non trovato.
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -306,7 +336,37 @@ namespace Accesso_Diretto_File
 
         private void Modifica_File_Click(object sender, EventArgs e)
         {
+            int indice = Ricerca_Binaria(Indici, Nome_Prodotto.Text);
 
+            if (Tasto_Modifica == false)
+            {
+                if (indice == -1)
+                {
+                    MessageBox.Show("il prodotto inserito non esiste, inserisci un prodotto esistente e riprova");
+                }
+                else
+                {
+                    Tasto_Modifica = true;
+                }
+            }
+            else
+            {
+                // Leggi il record i - 1
+                File_R.BaseStream.Seek((Indici[indice].Indice - 1) * Lunghezza_Record, 0);
+
+                if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text == "")
+                {
+                    // Caso ricerca dal numero prodotto (non controllo errori di inserimento)
+                }
+                else if (Prezzo_Prodotto.Text == "" && Nome_Prodotto.Text != "")
+                {
+                    // Caso ricerca dal nome prodotto (non controllo errori di inserimento)
+                }
+                else if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text != "")
+                {
+                    // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
+                }
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
