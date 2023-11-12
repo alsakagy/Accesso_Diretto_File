@@ -39,16 +39,14 @@
             this.label3 = new System.Windows.Forms.Label();
             this.Resetta_File = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.Ricerca_NomeProdotto = new System.Windows.Forms.TextBox();
+            this.Ricerca_Prodotto = new System.Windows.Forms.TextBox();
             this.Ricerca_Prodotti = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.Ricerca_NumeroProdotto = new System.Windows.Forms.TextBox();
             this.Modifica_File = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.Recupera_Prodotto = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.Prodotto_Recuperare = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Nome_Prodotto
@@ -148,46 +146,29 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(528, 329);
+            this.label4.Location = new System.Drawing.Point(536, 376);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(270, 25);
             this.label4.TabIndex = 16;
             this.label4.Text = "Nome Prodotto Da Cercare\r\n";
             // 
-            // Ricerca_NomeProdotto
+            // Ricerca_Prodotto
             // 
-            this.Ricerca_NomeProdotto.Location = new System.Drawing.Point(543, 379);
-            this.Ricerca_NomeProdotto.Name = "Ricerca_NomeProdotto";
-            this.Ricerca_NomeProdotto.Size = new System.Drawing.Size(242, 20);
-            this.Ricerca_NomeProdotto.TabIndex = 15;
+            this.Ricerca_Prodotto.Location = new System.Drawing.Point(551, 426);
+            this.Ricerca_Prodotto.Name = "Ricerca_Prodotto";
+            this.Ricerca_Prodotto.Size = new System.Drawing.Size(242, 20);
+            this.Ricerca_Prodotto.TabIndex = 15;
             // 
             // Ricerca_Prodotti
             // 
             this.Ricerca_Prodotti.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Ricerca_Prodotti.Location = new System.Drawing.Point(584, 222);
+            this.Ricerca_Prodotti.Location = new System.Drawing.Point(592, 269);
             this.Ricerca_Prodotti.Name = "Ricerca_Prodotti";
             this.Ricerca_Prodotti.Size = new System.Drawing.Size(156, 76);
             this.Ricerca_Prodotti.TabIndex = 14;
             this.Ricerca_Prodotti.Text = "Ricerca Prodotti\r\n";
             this.Ricerca_Prodotti.UseVisualStyleBackColor = true;
             this.Ricerca_Prodotti.Click += new System.EventHandler(this.Ricerca_Prodotti_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(518, 418);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(283, 25);
-            this.label5.TabIndex = 18;
-            this.label5.Text = "Record Prodotto Da Cercare\r\n";
-            // 
-            // Ricerca_NumeroProdotto
-            // 
-            this.Ricerca_NumeroProdotto.Location = new System.Drawing.Point(543, 462);
-            this.Ricerca_NumeroProdotto.Name = "Ricerca_NumeroProdotto";
-            this.Ricerca_NumeroProdotto.Size = new System.Drawing.Size(242, 20);
-            this.Ricerca_NumeroProdotto.TabIndex = 17;
             // 
             // Modifica_File
             // 
@@ -200,15 +181,15 @@
             this.Modifica_File.UseVisualStyleBackColor = true;
             this.Modifica_File.Click += new System.EventHandler(this.Modifica_File_Click);
             // 
-            // button1
+            // Recupera_Prodotto
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(161, 402);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(156, 76);
-            this.button1.TabIndex = 20;
-            this.button1.Text = "Recupera_Prodotto\r\n";
-            this.button1.UseVisualStyleBackColor = true;
+            this.Recupera_Prodotto.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Recupera_Prodotto.Location = new System.Drawing.Point(161, 402);
+            this.Recupera_Prodotto.Name = "Recupera_Prodotto";
+            this.Recupera_Prodotto.Size = new System.Drawing.Size(156, 76);
+            this.Recupera_Prodotto.TabIndex = 20;
+            this.Recupera_Prodotto.Text = "Recupera Prodotto\r\n";
+            this.Recupera_Prodotto.UseVisualStyleBackColor = true;
             // 
             // label6
             // 
@@ -220,12 +201,12 @@
             this.label6.TabIndex = 22;
             this.label6.Text = "Nome Prodotto Da Recuperare\r\n";
             // 
-            // textBox1
+            // Prodotto_Recuperare
             // 
-            this.textBox1.Location = new System.Drawing.Point(120, 533);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(242, 20);
-            this.textBox1.TabIndex = 21;
+            this.Prodotto_Recuperare.Location = new System.Drawing.Point(120, 533);
+            this.Prodotto_Recuperare.Name = "Prodotto_Recuperare";
+            this.Prodotto_Recuperare.Size = new System.Drawing.Size(242, 20);
+            this.Prodotto_Recuperare.TabIndex = 21;
             // 
             // label7
             // 
@@ -238,32 +219,30 @@
             this.label7.Text = "Per aggiungere un prodotto scrivere nome e prezzo\r\nnelle categorie e poi cliccare" +
     " aggiugi";
             // 
-            // label8
+            // button2
             // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(469, 155);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(385, 32);
-            this.label8.TabIndex = 24;
-            this.label8.Text = "Per modificare un prodotto scrivere il nome precedente\r\npoi cliccare il tasto mod" +
-    "ifica e scrivere il nuovo nome e/o prezzo";
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.Location = new System.Drawing.Point(613, 146);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(135, 52);
+            this.button2.TabIndex = 24;
+            this.button2.Text = "Conferma";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(948, 575);
-            this.Controls.Add(this.label8);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.Prodotto_Recuperare);
+            this.Controls.Add(this.Recupera_Prodotto);
             this.Controls.Add(this.Modifica_File);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.Ricerca_NumeroProdotto);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.Ricerca_NomeProdotto);
+            this.Controls.Add(this.Ricerca_Prodotto);
             this.Controls.Add(this.Ricerca_Prodotti);
             this.Controls.Add(this.Resetta_File);
             this.Controls.Add(this.label3);
@@ -297,16 +276,14 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button Resetta_File;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox Ricerca_NomeProdotto;
+        private System.Windows.Forms.TextBox Ricerca_Prodotto;
         private System.Windows.Forms.Button Ricerca_Prodotti;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox Ricerca_NumeroProdotto;
         private System.Windows.Forms.Button Modifica_File;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button Recupera_Prodotto;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox Prodotto_Recuperare;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button button2;
     }
 }
 

@@ -30,11 +30,12 @@ namespace Accesso_Diretto_File
         string Riga;
         string Riga_Vuoto;
         byte[] Riga_Binario;
-        double Prezzo;
+        string Prezzo;
         int Lunghezza_Record = 64;
         int Numero_Prodotti = 0;
         int Max_Record = 100;
         bool Tasto_Modifica = false;
+        int indice_Modifica;
 
         // Dichiaro il Writer, reader, FileStream
         FileStream Percorso_File;
@@ -56,10 +57,10 @@ namespace Accesso_Diretto_File
             Bw.Close();
         }
 
-        public int Ricerca_Binaria(Dati[] array, string elemento)
+        public int Ricerca_Binaria(Dati[] array, int lunghezza, string elemento)
         {
             int inizio = 0;
-            int fine = array.Length - 1;
+            int fine = lunghezza - 1;
 
             while (inizio <= fine)
             {
@@ -175,7 +176,7 @@ namespace Accesso_Diretto_File
                 {
                     // Inserimento dati nelle variabili
                     Nome = Nome_Prodotto.Text;
-                    Prezzo = Convert.ToDouble(Prezzo_Prodotto.Text);
+                    Prezzo = Prezzo_Prodotto.Text;
 
                     if(Nome.Length < 31 && Prezzo_Prodotto.Text.Length < 32)
                     {
@@ -277,7 +278,7 @@ namespace Accesso_Diretto_File
                                 Numero_Prodotti++;
 
                                 // Conversione in binario dei dati
-                                Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
+                                Riga = '|' + Nome.PadRight(31) + Prezzo.PadRight(30) + "1".PadRight(2);
                                 Riga_Binario = Encoding.Default.GetBytes(Riga);
 
                                 // Inserimento nel file
@@ -320,53 +321,73 @@ namespace Accesso_Diretto_File
 
         private void Ricerca_Prodotti_Click(object sender, EventArgs e)
         {
-            if (Ricerca_NomeProdotto.Text == "" && Ricerca_NumeroProdotto.Text != "")
+            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Ricerca_Prodotto.Text);
+
+            if(ricerca == -1)
             {
-                // Caso ricerca dal numero prodotto (non controllo errori di inserimento)
-            }
-            else if (Ricerca_NumeroProdotto.Text == "" && Ricerca_NomeProdotto.Text != "")
-            {
-                // Caso ricerca dal nome prodotto (non controllo errori di inserimento)
+                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                Ricerca_Prodotto.Text = "";
             }
             else
             {
-                // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
+                byte[] Leggi_Record;
+                string Record;
+
+                // Leggi il record del prodotto ricercato
+                File_R.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                // leggo il record (lungo 64)
+                Leggi_Record = File_R.ReadBytes(64);
+                Record = Encoding.Default.GetString(Leggi_Record);
+
+                MessageBox.Show($"Nome Prodotto:    {Record.Substring(1, 31).TrimEnd(' ')}\nPrezzo Prodotto:    {Record.Substring(32, 30).TrimEnd(' ')}\nQuantità:   {Record.Substring(62, 2)}");
+                Ricerca_Prodotto.Text = "";
             }
         }
 
         private void Modifica_File_Click(object sender, EventArgs e)
         {
-            int indice = Ricerca_Binaria(Indici, Nome_Prodotto.Text);
-
+            /*
+             * 
+             * DA RIFARE DA CAPO
+             * ANCHE LA GRAFICA E INTERFACCIA CON UTENTE
+             * 
             if (Tasto_Modifica == false)
             {
-                if (indice == -1)
+                indice_Modifica = Ricerca_Binaria(Indici, Numero_Prodotti, Nome_Prodotto.Text);
+                if (indice_Modifica == -1)
                 {
                     MessageBox.Show("il prodotto inserito non esiste, inserisci un prodotto esistente e riprova");
                 }
                 else
                 {
                     Tasto_Modifica = true;
+                    Nome_Prodotto.Text = "";
                 }
             }
             else
             {
-                // Leggi il record i - 1
-                File_R.BaseStream.Seek((Indici[indice].Indice - 1) * Lunghezza_Record, 0);
-
+                // Caso nessun inserimento
                 if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text == "")
                 {
-                    // Caso ricerca dal numero prodotto (non controllo errori di inserimento)
+                    MessageBox.Show("non sono stati inseriti i campi da modificare, inserisci i dati e riprova");
                 }
+                // Caso Inserimento solo nome
                 else if (Prezzo_Prodotto.Text == "" && Nome_Prodotto.Text != "")
                 {
-                    // Caso ricerca dal nome prodotto (non controllo errori di inserimento)
+
                 }
+                // Caso Inserimento solo prezzo
                 else if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text != "")
                 {
-                    // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
+
                 }
-            }
+                // Caso Inserimento Nome e Prezzo
+                else
+                {
+
+                }
+            } */
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
