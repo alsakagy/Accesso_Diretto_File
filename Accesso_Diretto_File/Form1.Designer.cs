@@ -114,6 +114,7 @@
             this.Cancellazione_Fisica.TabIndex = 8;
             this.Cancellazione_Fisica.Text = "Cancellazione Fisica";
             this.Cancellazione_Fisica.UseVisualStyleBackColor = true;
+            this.Cancellazione_Fisica.Click += new System.EventHandler(this.Cancellazione_Fisica_Click);
             // 
             // Prodotto_Cancellare
             // 

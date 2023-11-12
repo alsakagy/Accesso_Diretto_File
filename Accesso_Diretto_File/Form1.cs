@@ -463,5 +463,46 @@ namespace Accesso_Diretto_File
                 MessageBox.Show("Prodotto recuperato");
             }
         }
+
+        private void Cancellazione_Fisica_Click(object sender, EventArgs e)
+        {
+            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
+
+            if (ricerca == -1)
+            {
+                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                Prodotto_Cancellare.Text = "";
+            }
+            else
+            {
+                // mi posiziono per la scrittura
+                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                // Impostazione riga vuota
+                Riga = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
+
+                // Trasformazione in binario
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // Sovrascrittura
+                File_W.Write(Riga_Binario);
+
+                // for che sposta tutti gli elementi della struct di uno
+                for(int i = ricerca; i < Numero_Prodotti - 1; i++)
+                {
+                    Indici[i].Nome = Indici[i + 1].Nome;
+                    Indici[i].Indice = Indici[i + 1].Indice;
+                }
+
+                // Diminuisco il numero di prodotti inseriti
+                Numero_Prodotti--;
+
+                // svuoto casella di testo
+                Prodotto_Cancellare.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto Cancellato fisicamente");
+            }
+        }
     }
 }
