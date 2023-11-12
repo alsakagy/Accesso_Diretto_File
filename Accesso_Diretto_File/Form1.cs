@@ -124,6 +124,7 @@ namespace Accesso_Diretto_File
             {
                 Indici[i].Nome = strings[i].Split(';')[0];
                 Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
+                Numero_Prodotti++;
             }
 
             Percorso_File = new FileStream("Prodotti.dat", FileMode.Open, FileAccess.ReadWrite);
@@ -300,6 +301,19 @@ namespace Accesso_Diretto_File
         private void Modifica_File_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            StreamWriter Sw = new StreamWriter("Record.txt");
+            for (int i = 0; i < Numero_Prodotti; i++)
+            {
+                Sw.WriteLine($"{Indici[i].Nome};{Indici[i].Indice}");
+            }
+            Sw.Close();
+            Percorso_File.Close();
+            File_W.Close();
+            File_R.Close();
         }
     }
 }
