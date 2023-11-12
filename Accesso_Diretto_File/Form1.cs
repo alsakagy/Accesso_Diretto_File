@@ -140,7 +140,7 @@ namespace Accesso_Diretto_File
         {
             if (Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
             {
-                if (Prezzo_Prodotto.Text.All(char.IsDigit) && (!Nome_Prodotto.Text.All(char.IsDigit) && !Nome_Prodotto.Text.All(char.IsLetter)))
+                if (Prezzo_Prodotto.Text.All(char.IsDigit) && Nome_Prodotto.Text.All(char.IsLetter))
                 {
                     // Inserimento dati nelle variabili
                     Nome = Nome_Prodotto.Text;
@@ -150,7 +150,6 @@ namespace Accesso_Diretto_File
                     {
                         if (Numero_Prodotti <= Max_Record - 1)
                         {
-                            Numero_Prodotti++;
                             // Array per il record letto 
                             byte[] Leggi_Record;
 
@@ -203,10 +202,42 @@ namespace Accesso_Diretto_File
                             }
                             else if (C_Vuoto == true)
                             {
-                                // Inserimento nel file Indici
-                                StreamWriter Stream = new StreamWriter("Record.txt", true);
-                                Stream.Write($"{Nome};{k}\n");
-                                Stream.Close();
+                                int y = Numero_Prodotti;
+
+                                if(y == 0)
+                                {
+                                    Indici[y].Nome = Nome;
+                                    Indici[y].Indice = k;
+                                }
+                                else
+                                {
+                                    bool Trovato = false;
+                                    while (Trovato == false)
+                                    {
+                                        if(y == 0)
+                                        {
+                                            Indici[y].Nome = Nome;
+                                            Indici[y].Indice = k;
+                                            Trovato = true;
+                                        }
+                                        else
+                                        {
+                                            if (Nome.CompareTo(Indici[y - 1].Nome) < 0)
+                                            {
+                                                Indici[y].Nome = Indici[y - 1].Nome;
+                                                Indici[y].Indice = Indici[y - 1].Indice;
+                                            }
+                                            else
+                                            {
+                                                Indici[y].Nome = Nome;
+                                                Indici[y].Indice = k;
+                                                Trovato = true;
+                                            }
+                                            y--;
+                                        }
+                                    }
+                                }
+                                Numero_Prodotti++;
 
                                 // Conversione in binario dei dati
                                 Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);

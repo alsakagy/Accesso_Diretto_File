@@ -244,10 +244,10 @@
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.Location = new System.Drawing.Point(469, 155);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(333, 32);
+            this.label8.Size = new System.Drawing.Size(385, 32);
             this.label8.TabIndex = 24;
-            this.label8.Text = "Per modificare un prodotto scrivere il nome precedente\r\ne poi scrivere il nuovo n" +
-    "ome e/o prezzo";
+            this.label8.Text = "Per modificare un prodotto scrivere il nome precedente\r\npoi cliccare il tasto mod" +
+    "ifica e scrivere il nuovo nome e/o prezzo";
             // 
             // Form1
             // 
