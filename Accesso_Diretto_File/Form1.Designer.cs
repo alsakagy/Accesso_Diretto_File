@@ -46,7 +46,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.Prodotto_Recuperare = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
+            this.Conferma = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Nome_Prodotto
@@ -222,23 +222,24 @@
             this.label7.Text = "Per aggiungere un prodotto scrivere nome e prezzo\r\nnelle categorie e poi cliccare" +
     " aggiugi";
             // 
-            // button2
+            // Conferma
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(613, 146);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(135, 52);
-            this.button2.TabIndex = 24;
-            this.button2.Text = "Conferma";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Visible = false;
+            this.Conferma.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Conferma.Location = new System.Drawing.Point(613, 146);
+            this.Conferma.Name = "Conferma";
+            this.Conferma.Size = new System.Drawing.Size(135, 52);
+            this.Conferma.TabIndex = 24;
+            this.Conferma.Text = "Conferma";
+            this.Conferma.UseVisualStyleBackColor = true;
+            this.Conferma.Visible = false;
+            this.Conferma.Click += new System.EventHandler(this.Conferma_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(948, 575);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.Conferma);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.Prodotto_Recuperare);
@@ -286,7 +287,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox Prodotto_Recuperare;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button Conferma;
     }
 }
 

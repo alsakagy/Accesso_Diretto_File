@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Microsoft.VisualBasic;
 
 namespace Accesso_Diretto_File
 {
@@ -34,8 +36,7 @@ namespace Accesso_Diretto_File
         int Lunghezza_Record = 64;
         int Numero_Prodotti = 0;
         int Max_Record = 100;
-        bool Tasto_Modifica = false;
-        int indice_Modifica;
+        int ricerca_Modifica;
 
         // Dichiaro il Writer, reader, FileStream
         FileStream Percorso_File;
@@ -358,47 +359,35 @@ namespace Accesso_Diretto_File
 
         private void Modifica_File_Click(object sender, EventArgs e)
         {
-            /*
-             * 
-             * DA RIFARE DA CAPO
-             * ANCHE LA GRAFICA E INTERFACCIA CON UTENTE
-             * 
-            if (Tasto_Modifica == false)
+            string Prodotto_Modifica = Interaction.InputBox("Inserisci il nome del prodotto che vuoi eliminare");
+
+            int ricerca_Modifica = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Modifica);
+
+            if (ricerca_Modifica == -1)
             {
-                indice_Modifica = Ricerca_Binaria(Indici, Numero_Prodotti, Nome_Prodotto.Text);
-                if (indice_Modifica == -1)
-                {
-                    MessageBox.Show("il prodotto inserito non esiste, inserisci un prodotto esistente e riprova");
-                }
-                else
-                {
-                    Tasto_Modifica = true;
-                    Nome_Prodotto.Text = "";
-                }
+                // messaggio errore
+                MessageBox.Show("il prodotto ricercato da modificare non esiste, inserisci un prodotto esistente e riprova");
             }
             else
             {
-                // Caso nessun inserimento
-                if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text == "")
-                {
-                    MessageBox.Show("non sono stati inseriti i campi da modificare, inserisci i dati e riprova");
-                }
-                // Caso Inserimento solo nome
-                else if (Prezzo_Prodotto.Text == "" && Nome_Prodotto.Text != "")
-                {
+                // instruzioni
+                MessageBox.Show("ora inserisci il nuovo nome e/o prezzo negli spazi dedicati");
 
-                }
-                // Caso Inserimento solo prezzo
-                else if (Nome_Prodotto.Text == "" && Prezzo_Prodotto.Text != "")
-                {
+                // Disattivo i campi non utili
+                Aggiungi.Enabled = false;
+                Resetta_File.Enabled = false;
+                Modifica_File.Enabled = false;
+                Cancellazione_Fisica.Enabled = false;
+                Cancellazione_Logica.Enabled = false;
+                Prodotto_Cancellare.Enabled = false;
+                Recupera_Prodotto.Enabled = false;
+                Prodotto_Recuperare.Enabled = false;
+                Ricerca_Prodotti.Enabled = false;
+                Ricerca_Prodotto.Enabled = false;
 
-                }
-                // Caso Inserimento Nome e Prezzo
-                else
-                {
-
-                }
-            } */
+                // rendo utilizzabile tasto di conferma
+                Conferma.Visible = true;
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -503,6 +492,84 @@ namespace Accesso_Diretto_File
                 // messaggio di avviso
                 MessageBox.Show("Prodotto Cancellato fisicamente");
             }
+        }
+
+        private void Conferma_Click(object sender, EventArgs e)
+        {
+
+            // mi posiziono per la lettura
+            File_R.BaseStream.Seek(((Indici[ricerca_Modifica].Indice) - 1) * Lunghezza_Record, 0);
+
+            // leggo il record (lungo 64)
+            byte[] Leggi_Record = File_R.ReadBytes(64);
+            string Record = Encoding.Default.GetString(Leggi_Record);
+
+            // mi posiziono per la scrittura
+            File_W.BaseStream.Seek(((Indici[ricerca_Modifica].Indice) - 1) * Lunghezza_Record, 0);
+
+            if (Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
+            {
+                // Impostazione riga con dati modificati
+                Riga = Record[0] + Nome_Prodotto.Text.PadRight(31) + Prezzo_Prodotto.Text.PadRight(30) + Record.Substring(62, 2);
+
+                // Trasformazione in binario
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // sovrascrivo il record
+                File_W.Write(Riga_Binario);
+
+                // svuoto le caselle di testo
+                Nome_Prodotto.Text = "";
+                Prezzo_Prodotto.Text = "";
+            }
+            else if(Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text == "")
+            {
+                // Impostazione riga con dati modificati
+                Riga = Record[0] + Nome_Prodotto.Text.PadRight(31) + Record.Substring(32, 32);
+
+                // Trasformazione in binario
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // sovrascrivo il record
+                File_W.Write(Riga_Binario);
+
+                // svuoto le caselle di testo
+                Nome_Prodotto.Text = "";
+            }
+            else if (Prezzo_Prodotto.Text != "" && Nome_Prodotto.Text == "")
+            {
+                // Impostazione riga con dati modificati
+                Riga = Record[0] + Record.Substring(1, 31) + Prezzo_Prodotto.Text.PadRight(30) + Record.Substring(62, 2);
+
+                // Trasformazione in binario
+                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                // sovrascrivo il record
+                File_W.Write(Riga_Binario);
+
+                // svuoto le caselle di testo
+                Prezzo_Prodotto.Text = "";
+            }
+            // Messaggio errore per mancato inserimento dati
+            else
+            {
+                MessageBox.Show("non hai inserito i campi necessari, riprova");
+            }
+
+            // riattivo i tasti disattivati
+            Aggiungi.Enabled = true;
+            Resetta_File.Enabled = true;
+            Modifica_File.Enabled = true;
+            Cancellazione_Fisica.Enabled = true;
+            Cancellazione_Logica.Enabled = true;
+            Prodotto_Cancellare.Enabled = true;
+            Recupera_Prodotto.Enabled = true;
+            Prodotto_Recuperare.Enabled = true;
+            Ricerca_Prodotti.Enabled = true;
+            Ricerca_Prodotto.Enabled = true;
+
+            // rendo invisibile il tasto conferma
+            Conferma.Visible = false;
         }
     }
 }
