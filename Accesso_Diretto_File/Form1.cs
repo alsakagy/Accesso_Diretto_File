@@ -205,10 +205,13 @@ namespace Accesso_Diretto_File
                                 // Controllo se esistente o no nel file
                                 if (Indici[i - 1].Nome == Nome)
                                 {
-                                    C_Nome = true;
-                                    j = i;
-                                    Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
-                                    break;
+                                    if (Leggi_Record[0] == '|')
+                                    {
+                                        C_Nome = true;
+                                        j = i;
+                                        Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
+                                        break;
+                                    }
                                 }
                                 else if (Leggi_Record[1] == '@')
                                 {
@@ -340,8 +343,16 @@ namespace Accesso_Diretto_File
                 Leggi_Record = File_R.ReadBytes(64);
                 Record = Encoding.Default.GetString(Leggi_Record);
 
-                MessageBox.Show($"Nome Prodotto:    {Record.Substring(1, 31).TrimEnd(' ')}\nPrezzo Prodotto:    {Record.Substring(32, 30).TrimEnd(' ')}\nQuantità:   {Record.Substring(62, 2)}");
-                Ricerca_Prodotto.Text = "";
+                if (Record[0] != '|')
+                {
+                    MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                    Ricerca_Prodotto.Text = "";
+                }
+                else
+                {
+                    MessageBox.Show($"Nome Prodotto:    {Record.Substring(1, 31).TrimEnd(' ')}\nPrezzo Prodotto:    {Record.Substring(32, 30).TrimEnd(' ')}\nQuantità:   {Record.Substring(62, 2)}");
+                    Ricerca_Prodotto.Text = "";
+                }
             }
         }
 
@@ -401,6 +412,56 @@ namespace Accesso_Diretto_File
             Percorso_File.Close();
             File_W.Close();
             File_R.Close();
+        }
+
+        private void Cancellazione_Logica_Click(object sender, EventArgs e)
+        {
+            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
+
+            if (ricerca == -1)
+            {
+                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                Prodotto_Cancellare.Text = "";
+            }
+            else
+            {
+                // mi posiziono per la scrittura
+                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                // sovrascrivo il carattere identificatore
+                File_W.Write(Encoding.Default.GetBytes("%"));
+
+                // svuoto casella di testo
+                Prodotto_Cancellare.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto cancellato logicamente");
+            }
+        }
+
+        private void Recupera_Prodotto_Click(object sender, EventArgs e)
+        {
+            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Recuperare.Text);
+
+            if (ricerca == -1)
+            {
+                MessageBox.Show("il prodotto in questione non è mai esistito o non può essere recuperato");
+                Prodotto_Recuperare.Text = "";
+            }
+            else
+            {
+                // mi posiziono per la scrittura
+                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                // sovrascrivo il carattere identificatore
+                File_W.Write(Encoding.Default.GetBytes("|"));
+
+                // svuoto casella di testo
+                Prodotto_Recuperare.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto recuperato");
+            }
         }
     }
 }

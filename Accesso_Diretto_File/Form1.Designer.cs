@@ -103,6 +103,7 @@
             this.Cancellazione_Logica.TabIndex = 7;
             this.Cancellazione_Logica.Text = "Cancellazione Logica";
             this.Cancellazione_Logica.UseVisualStyleBackColor = true;
+            this.Cancellazione_Logica.Click += new System.EventHandler(this.Cancellazione_Logica_Click);
             // 
             // Cancellazione_Fisica
             // 
@@ -190,6 +191,7 @@
             this.Recupera_Prodotto.TabIndex = 20;
             this.Recupera_Prodotto.Text = "Recupera Prodotto\r\n";
             this.Recupera_Prodotto.UseVisualStyleBackColor = true;
+            this.Recupera_Prodotto.Click += new System.EventHandler(this.Recupera_Prodotto_Click);
             // 
             // label6
             // 
