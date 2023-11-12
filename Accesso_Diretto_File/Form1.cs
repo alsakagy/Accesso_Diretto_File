@@ -22,64 +22,112 @@ namespace Accesso_Diretto_File
         }
 
         // Dati Comuni
-        public Dati[] Indici; 
+        public Dati[] Indici;
         string Dati_Vuoto = "@";
         string Nome;
         string Riga;
         string Riga_Vuoto;
-        string File_Record = "Record.txt";
         byte[] Riga_Binario;
         double Prezzo;
         int Lunghezza_Record = 64;
 
-        // Dichiaro il Writer, reader, FileStream e il File Indici
+        // Dichiaro il Writer, reader, FileStream
         FileStream Percorso_File;
         BinaryWriter File_W;
         BinaryReader File_R;
 
         public void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
         {
+            BinaryWriter Bw = new BinaryWriter(Percorso_File);
             // Creo riga con dati vuoti
             Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
-            for (int i = 1; i <= 64; i++)
+            for (int i = 1; i <= 100; i++)
             {
-                File_W.Write(Riga_Binario);
+                Bw.Write(Riga_Binario);
             }
+            Bw.Close();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            Percorso_File = new FileStream("Prodotti.dat", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            // Controllo per lettura da file struct (serve per evitare di fare 2 volte la lettura dei dati)
+            bool temp = false;
 
-            // Apro il Writer e reader
+            // se il file prodotti.dat non esiste ma il file record.txt esiste
+            if (File.Exists("Prodotti.dat") == false && File.Exists("Record.txt") == true)
+            {
+                // apre il file 'prodotti.dat' creandolo e lo chiude
+                FileStream File = new FileStream("Prodotti.dat", FileMode.Create, FileAccess.ReadWrite);
+                Reset_File(File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File.Close();
+
+                // apre il file 'record.txt' e lo svuota aprendolo il truncate
+                FileStream Files = new FileStream("Record.txt", FileMode.Truncate, FileAccess.ReadWrite);
+                Files.Close();
+            }
+            // se il file prodotti.dat non esiste e il file record.txt non esiste
+            else if (File.Exists("Prodotti.dat") == false && File.Exists("Record.txt") == false)
+            {
+                // apre il file 'prodotti.dat' creandolo e lo chiude
+                FileStream File = new FileStream("Prodotti.dat", FileMode.Create, FileAccess.ReadWrite);
+                Reset_File(File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File.Close();
+
+                // apre il file 'record.txt' creandolo e lo chiude
+                FileStream Files = new FileStream("Record.txt", FileMode.Create, FileAccess.ReadWrite);
+                Files.Close();
+            }
+            // se il file prodotti.dat esiste ma il file record.txt non esiste
+            else if (File.Exists("Prodotti.dat") == true && File.Exists("Record.txt") == false)
+            {
+                // apre il file 'prodotti.dat' e il reader
+                FileStream File = new FileStream("Prodotti.dat", FileMode.Open, FileAccess.ReadWrite);
+                BinaryReader Br = new BinaryReader(File);
+
+                // apre il file 'record.txt' creandolo
+                FileStream Files = new FileStream("Record.txt", FileMode.Create, FileAccess.ReadWrite);
+                Files.Close();
+
+                // for per il numero di record che legge il nome e il numero prodotto e li salva nel file struct
+                byte[] Leggi_Record;
+                for (int i = 1; i <= 100; i++)
+                {
+                    // Leggi il record i - 1
+                    Br.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+
+                    // Leggi del record i primi 32 byte che comprendono il controllo a cancellazione logica e il nome
+                    Leggi_Record = Br.ReadBytes(32);
+
+                    // Scrivo nella struct solo i dati dei record non vuoti
+                    if (Leggi_Record[1] != '@')
+                    {
+                        Indici[i - 1].Nome = Encoding.Default.GetString(Leggi_Record, 1, 31);
+                        Indici[i - 1].Indice = i - 1;
+                    }
+                }
+                temp = true;
+                Br.Close();
+                File.Close();
+            }
+
+            if (temp != true)
+            {
+                // Lettura dati
+                string[] strings = File.ReadAllLines("Record.txt");
+
+                // Ciclo for per inserimento dati nella struct
+                for (int i = 0; i < strings.Length; i++)
+                {
+                    Indici[i].Nome = strings[i].Split(';')[0];
+                    Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
+                }
+            }
+
+            Percorso_File = new FileStream("Prodotti.dat", FileMode.Open, FileAccess.ReadWrite);
             File_W = new BinaryWriter(Percorso_File);
             File_R = new BinaryReader(Percorso_File);
-
-            // Metodo per la dimensione (in byte) del file
-            FileInfo Info = new FileInfo("Prodotti.dat");
-            /* Utilizzo la dimensione del file per capire se è vuoto
-            - nel caso dimesione e zero riempio il file con un contenuto vuoto (le chiocciole)
-            _ nel caso dimensione diversa da zero il file è già pieno */
-            if (File.Exists("Prodotti.dat") == false || Info.Length == 0)
-            {
-                Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
-                File.Delete(File_Record);
-                File.Create(File_Record);
-                MessageBox.Show("Attenzione: il file dei prodotti è stato cancellato o non esiste, per evitare errori è stato resettato anche il file contenente gli indici");
-            }
-
-            // Lettura dati
-            string[] strings = File.ReadAllLines(File_Record);
-
-            // Ciclo for per inserimento dati nella struct
-            for(int i = 0; i < strings.Length; i++)
-            {
-                Indici[i].Nome = strings[i].Split(';')[0];
-                Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
-            }
-
         }
         public Form1()
         {
@@ -87,7 +135,6 @@ namespace Accesso_Diretto_File
             // Dichiaro la struct
             Indici = new Dati[100];
         }
-
         private void Aggiungi_Click(object sender, EventArgs e)
         {
             // Array per il record letto 
@@ -99,13 +146,12 @@ namespace Accesso_Diretto_File
             int j = 0;
             int k = 0;
             int Quantità = 0;
-            bool temp1 = true;
-            bool temp2 = true;
+            bool temp = true;
 
             // Gira per il numero di record fino a che non trova un record vuoto
             for (int i = 1; i < 100; i++)
             {
-                // Leggi il record i + 1
+                // Leggi il record i - 1
                 File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
 
                 // Inserimento dati nelle variabili
@@ -119,27 +165,23 @@ namespace Accesso_Diretto_File
                 if (Indici[i - 1].Nome == Nome)
                 {
                     C_Nome = true;
-                    if (temp1)
-                    {
-                        j = i;
-                        temp1 = false;
-                        Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
-                    }
+                    j = i;
+                    Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
                     break;
                 }
                 else if (Leggi_Record[1] == '@')
                 {
                     C_Vuoto = true;
-                    if(temp2)
+                    if (temp)
                     {
                         k = i;
-                        temp2 = false;
+                        temp = false;
                     }
                 }
             }
 
             // If di svolgimento aggiunta
-            if(C_Nome == true)
+            if (C_Nome == true)
             {
                 // Conversione in binario dei dati
                 Riga = $"{Quantità + 1}".PadRight(2);
@@ -149,10 +191,10 @@ namespace Accesso_Diretto_File
                 File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
                 File_W.Write(Riga_Binario);
             }
-            else if(C_Vuoto == true && C_Nome == false)
+            else if (C_Vuoto == true)
             {
                 // Inserimento nel file Indici
-                StreamWriter Stream = new StreamWriter(File_Record, true);
+                StreamWriter Stream = new StreamWriter("Record.txt", true);
                 Stream.Write($"{Nome};{k}\n");
                 Stream.Close();
 
@@ -172,15 +214,19 @@ namespace Accesso_Diretto_File
         private void Resetta_File_Click(object sender, EventArgs e)
         {
             Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+            // apre il file 'record.txt' e lo svuota aprendolo il truncate
+            FileStream Files = new FileStream("Record.txt", FileMode.Truncate, FileAccess.ReadWrite);
+            Files.Close();
+            MessageBox.Show("hai resettato il file prodotti, perciò e stato resettato anche il file degli indici");
         }
 
         private void Ricerca_Prodotti_Click(object sender, EventArgs e)
         {
-            if(Ricerca_NomeProdotto.Text == "" && Ricerca_NumeroProdotto.Text != "")
+            if (Ricerca_NomeProdotto.Text == "" && Ricerca_NumeroProdotto.Text != "")
             {
                 // Caso ricerca dal numero prodotto (non controllo errori di inserimento)
             }
-            else if(Ricerca_NumeroProdotto.Text == "" && Ricerca_NomeProdotto.Text != "")
+            else if (Ricerca_NumeroProdotto.Text == "" && Ricerca_NomeProdotto.Text != "")
             {
                 // Caso ricerca dal nome prodotto (non controllo errori di inserimento)
             }
@@ -195,6 +241,6 @@ namespace Accesso_Diretto_File
          * -bisogna aver un numero per indicare quali sono gli elementi validi nei 100 dell'array
          * -e poi si salva su file alla chiusura del file 
          * -alla apertura si riempe di nuovo l'array di struct
-         */
-    }
+         */
+    }
 }
