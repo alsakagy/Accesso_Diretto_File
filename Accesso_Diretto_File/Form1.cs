@@ -138,95 +138,101 @@ namespace Accesso_Diretto_File
         }
         private void Aggiungi_Click(object sender, EventArgs e)
         {
-            if(Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
+            if (Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
             {
-                // Inserimento dati nelle variabili
-                Nome = Nome_Prodotto.Text;
-                if(int.TryParse(Prezzo_Prodotto.Text,out _))
-                Prezzo = Convert.ToDouble(Prezzo_Prodotto.Text);
-
-                if(Nome.Length < 31 && Prezzo_Prodotto.Text.Length < 32)
+                if (Prezzo_Prodotto.Text.All(char.IsDigit) && Nome_Prodotto.Text.All(char.IsLetter))
                 {
-                    if (Numero_Prodotti <= Max_Record - 1)
+                    // Inserimento dati nelle variabili
+                    Nome = Nome_Prodotto.Text;
+                    Prezzo = Convert.ToDouble(Prezzo_Prodotto.Text);
+
+                    if(Nome.Length < 31 && Prezzo_Prodotto.Text.Length < 32)
                     {
-                        Numero_Prodotti++;
-                        // Array per il record letto 
-                        byte[] Leggi_Record;
-
-                        // Variabili bool e int
-                        bool C_Nome = false;
-                        bool C_Vuoto = false;
-                        int j = 0;
-                        int k = 0;
-                        int Quantità = 0;
-                        bool temp = true;
-
-                        // Gira per il numero di record fino a che non trova un record vuoto
-                        for (int i = 1; i < Max_Record; i++)
+                        if (Numero_Prodotti <= Max_Record - 1)
                         {
-                            // Leggi il record i - 1
-                            File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+                            Numero_Prodotti++;
+                            // Array per il record letto 
+                            byte[] Leggi_Record;
 
-                            // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
-                            Leggi_Record = File_R.ReadBytes(64);
+                            // Variabili bool e int
+                            bool C_Nome = false;
+                            bool C_Vuoto = false;
+                            int j = 0;
+                            int k = 0;
+                            int Quantità = 0;
+                            bool temp = true;
 
-                            // Controllo se esistente o no nel file
-                            if (Indici[i - 1].Nome == Nome)
+                            // Gira per il numero di record fino a che non trova un record vuoto
+                            for (int i = 1; i < Max_Record; i++)
                             {
-                                C_Nome = true;
-                                j = i;
-                                Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
-                                break;
-                            }
-                            else if (Leggi_Record[1] == '@')
-                            {
-                                C_Vuoto = true;
-                                if (temp)
+                                // Leggi il record i - 1
+                                File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+
+                                // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
+                                Leggi_Record = File_R.ReadBytes(64);
+
+                                // Controllo se esistente o no nel file
+                                if (Indici[i - 1].Nome == Nome)
                                 {
-                                    k = i;
-                                    temp = false;
+                                    C_Nome = true;
+                                    j = i;
+                                    Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
+                                    break;
+                                }
+                                else if (Leggi_Record[1] == '@')
+                                {
+                                    C_Vuoto = true;
+                                    if (temp)
+                                    {
+                                        k = i;
+                                        temp = false;
+                                    }
                                 }
                             }
-                        }
 
-                        // If di svolgimento aggiunta
-                        if (C_Nome == true)
+                            // If di svolgimento aggiunta
+                            if (C_Nome == true)
+                            {
+                                // Conversione in binario dei dati
+                                Riga = $"{Quantità + 1}".PadRight(2);
+                                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                                // Inserimento nel file
+                                File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
+                                File_W.Write(Riga_Binario);
+                            }
+                            else if (C_Vuoto == true)
+                            {
+                                // Inserimento nel file Indici
+                                StreamWriter Stream = new StreamWriter("Record.txt", true);
+                                Stream.Write($"{Nome};{k}\n");
+                                Stream.Close();
+
+                                // Conversione in binario dei dati
+                                Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
+                                Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                                // Inserimento nel file
+                                File_W.BaseStream.Seek(((k) - 1) * Lunghezza_Record, 0);
+                                File_W.Write(Riga_Binario);
+                            }
+                            // Svuoto caselle di testo nel form
+                            Nome_Prodotto.Text = "";
+                            Prezzo_Prodotto.Text = "";
+                        }
+                        else
                         {
-                            // Conversione in binario dei dati
-                            Riga = $"{Quantità + 1}".PadRight(2);
-                            Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                            // Inserimento nel file
-                            File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
-                            File_W.Write(Riga_Binario);
+                            MessageBox.Show("hai raggiunto il numero massimo di record, cancella dei prodotti e riprova");
                         }
-                        else if (C_Vuoto == true)
-                        {
-                            // Inserimento nel file Indici
-                            StreamWriter Stream = new StreamWriter("Record.txt", true);
-                            Stream.Write($"{Nome};{k}\n");
-                            Stream.Close();
-
-                            // Conversione in binario dei dati
-                            Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
-                            Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                            // Inserimento nel file
-                            File_W.BaseStream.Seek(((k) - 1) * Lunghezza_Record, 0);
-                            File_W.Write(Riga_Binario);
-                        }
-                        // Svuoto caselle di testo nel form
-                        Nome_Prodotto.Text = "";
-                        Prezzo_Prodotto.Text = "";
                     }
                     else
                     {
-                        MessageBox.Show("hai raggiunto il numero massimo di record, cancella dei prodotti e riprova");
+                        MessageBox.Show("il nome o il prezzo sono troppo lunghi per essere memorizzati diminuisci la lunghezza e riprova");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("il nome o il prezzo sono troppo lunghi per essere memorizzati diminuisci la lunghezza e riprova");
+                    MessageBox.Show("il prezzo non è un numero o il nome non è una stringa, correggi gli errori e riprova");
                 }
             }
             else
