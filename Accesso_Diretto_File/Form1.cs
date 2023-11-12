@@ -30,6 +30,8 @@ namespace Accesso_Diretto_File
         byte[] Riga_Binario;
         double Prezzo;
         int Lunghezza_Record = 64;
+        int Numero_Prodotti = 0;
+        int Max_Record = 100;
 
         // Dichiaro il Writer, reader, FileStream
         FileStream Percorso_File;
@@ -44,7 +46,7 @@ namespace Accesso_Diretto_File
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
-            for (int i = 1; i <= 100; i++)
+            for (int i = 1; i <= Max_Record; i++)
             {
                 Bw.Write(Riga_Binario);
             }
@@ -89,7 +91,7 @@ namespace Accesso_Diretto_File
 
                 // for per il numero di record che legge il nome e il numero prodotto e li salva nel file struct
                 byte[] Leggi_Record;
-                for (int i = 1; i <= 100; i++)
+                for (int i = 1; i <= Max_Record; i++)
                 {
                     // Leggi il record i - 1
                     Br.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
@@ -107,6 +109,7 @@ namespace Accesso_Diretto_File
                         StreamWriter Stream = new StreamWriter("Record.txt", true);
                         Stream.Write($"{temp};{i - 1}\n");
                         Stream.Close();
+                        Numero_Prodotti++;
                     }
                 }
                 Br.Close();
@@ -131,82 +134,105 @@ namespace Accesso_Diretto_File
         {
             InitializeComponent();
             // Dichiaro la struct
-            Indici = new Dati[100];
+            Indici = new Dati[Max_Record];
         }
         private void Aggiungi_Click(object sender, EventArgs e)
         {
-            // Array per il record letto 
-            byte[] Leggi_Record;
-
-            // Variabili bool e int
-            bool C_Nome = false;
-            bool C_Vuoto = false;
-            int j = 0;
-            int k = 0;
-            int Quantità = 0;
-            bool temp = true;
-
-            // Gira per il numero di record fino a che non trova un record vuoto
-            for (int i = 1; i < 100; i++)
+            if(Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
             {
-                // Leggi il record i - 1
-                File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
-
                 // Inserimento dati nelle variabili
                 Nome = Nome_Prodotto.Text;
+                if(int.TryParse(Prezzo_Prodotto.Text,out _))
                 Prezzo = Convert.ToDouble(Prezzo_Prodotto.Text);
 
-                // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
-                Leggi_Record = File_R.ReadBytes(64);
-
-                // Controllo se esistente o no nel file
-                if (Indici[i - 1].Nome == Nome)
+                if(Nome.Length < 31 && Prezzo_Prodotto.Text.Length < 32)
                 {
-                    C_Nome = true;
-                    j = i;
-                    Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
-                    break;
-                }
-                else if (Leggi_Record[1] == '@')
-                {
-                    C_Vuoto = true;
-                    if (temp)
+                    if (Numero_Prodotti <= Max_Record - 1)
                     {
-                        k = i;
-                        temp = false;
+                        Numero_Prodotti++;
+                        // Array per il record letto 
+                        byte[] Leggi_Record;
+
+                        // Variabili bool e int
+                        bool C_Nome = false;
+                        bool C_Vuoto = false;
+                        int j = 0;
+                        int k = 0;
+                        int Quantità = 0;
+                        bool temp = true;
+
+                        // Gira per il numero di record fino a che non trova un record vuoto
+                        for (int i = 1; i < Max_Record; i++)
+                        {
+                            // Leggi il record i - 1
+                            File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+
+                            // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
+                            Leggi_Record = File_R.ReadBytes(64);
+
+                            // Controllo se esistente o no nel file
+                            if (Indici[i - 1].Nome == Nome)
+                            {
+                                C_Nome = true;
+                                j = i;
+                                Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
+                                break;
+                            }
+                            else if (Leggi_Record[1] == '@')
+                            {
+                                C_Vuoto = true;
+                                if (temp)
+                                {
+                                    k = i;
+                                    temp = false;
+                                }
+                            }
+                        }
+
+                        // If di svolgimento aggiunta
+                        if (C_Nome == true)
+                        {
+                            // Conversione in binario dei dati
+                            Riga = $"{Quantità + 1}".PadRight(2);
+                            Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                            // Inserimento nel file
+                            File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
+                            File_W.Write(Riga_Binario);
+                        }
+                        else if (C_Vuoto == true)
+                        {
+                            // Inserimento nel file Indici
+                            StreamWriter Stream = new StreamWriter("Record.txt", true);
+                            Stream.Write($"{Nome};{k}\n");
+                            Stream.Close();
+
+                            // Conversione in binario dei dati
+                            Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
+                            Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                            // Inserimento nel file
+                            File_W.BaseStream.Seek(((k) - 1) * Lunghezza_Record, 0);
+                            File_W.Write(Riga_Binario);
+                        }
+                        // Svuoto caselle di testo nel form
+                        Nome_Prodotto.Text = "";
+                        Prezzo_Prodotto.Text = "";
+                    }
+                    else
+                    {
+                        MessageBox.Show("hai raggiunto il numero massimo di record, cancella dei prodotti e riprova");
                     }
                 }
+                else
+                {
+                    MessageBox.Show("il nome o il prezzo sono troppo lunghi per essere memorizzati diminuisci la lunghezza e riprova");
+                }
             }
-
-            // If di svolgimento aggiunta
-            if (C_Nome == true)
+            else
             {
-                // Conversione in binario dei dati
-                Riga = $"{Quantità + 1}".PadRight(2);
-                Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                // Inserimento nel file
-                File_W.BaseStream.Seek(((j - 1) * Lunghezza_Record) + 62, 0);
-                File_W.Write(Riga_Binario);
+                MessageBox.Show("non hai inserito il nome o il prezzo, assicurati di aver inserito tutti i dati e riprova");
             }
-            else if (C_Vuoto == true)
-            {
-                // Inserimento nel file Indici
-                StreamWriter Stream = new StreamWriter("Record.txt", true);
-                Stream.Write($"{Nome};{k}\n");
-                Stream.Close();
-
-                // Conversione in binario dei dati
-                Riga = '|' + Nome.PadRight(31) + Prezzo.ToString().PadRight(30) + "1".PadRight(2);
-                Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                // Inserimento nel file
-                File_W.BaseStream.Seek(((k) - 1) * Lunghezza_Record, 0);
-                File_W.Write(Riga_Binario);
-            }
-            // Svuoto caselle di testo nel form
-            Nome_Prodotto.Text = "";
-            Prezzo_Prodotto.Text = "";
         }
 
         private void Resetta_File_Click(object sender, EventArgs e)
@@ -233,5 +259,10 @@ namespace Accesso_Diretto_File
                 // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
             }
         }
-    }
+
+        private void Modifica_File_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
 }
