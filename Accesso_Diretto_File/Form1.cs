@@ -140,7 +140,7 @@ namespace Accesso_Diretto_File
         {
             if (Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text != "")
             {
-                if (Prezzo_Prodotto.Text.All(char.IsDigit) && Nome_Prodotto.Text.All(char.IsLetter))
+                if (Prezzo_Prodotto.Text.All(char.IsDigit) && (!Nome_Prodotto.Text.All(char.IsDigit) && !Nome_Prodotto.Text.All(char.IsLetter)))
                 {
                     // Inserimento dati nelle variabili
                     Nome = Nome_Prodotto.Text;
