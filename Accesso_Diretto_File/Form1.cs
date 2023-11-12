@@ -52,9 +52,6 @@ namespace Accesso_Diretto_File
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Controllo per lettura da file struct (serve per evitare di fare 2 volte la lettura dei dati)
-            bool temp = false;
-
             // se il file prodotti.dat non esiste ma il file record.txt esiste
             if (File.Exists("Prodotti.dat") == false && File.Exists("Record.txt") == true)
             {
@@ -103,26 +100,27 @@ namespace Accesso_Diretto_File
                     // Scrivo nella struct solo i dati dei record non vuoti
                     if (Leggi_Record[1] != '@')
                     {
-                        Indici[i - 1].Nome = Encoding.Default.GetString(Leggi_Record, 1, 31);
-                        Indici[i - 1].Indice = i - 1;
+                        // Prende il nome e rimuove gli spazi alla fine
+                        string temp = Encoding.Default.GetString(Leggi_Record, 1, 31).TrimEnd(' ');
+              
+                        // scrive nel file struct
+                        StreamWriter Stream = new StreamWriter("Record.txt", true);
+                        Stream.Write($"{temp};{i - 1}\n");
+                        Stream.Close();
                     }
                 }
-                temp = true;
                 Br.Close();
                 File.Close();
             }
 
-            if (temp != true)
-            {
-                // Lettura dati
-                string[] strings = File.ReadAllLines("Record.txt");
+            // Lettura dati
+            string[] strings = File.ReadAllLines("Record.txt");
 
-                // Ciclo for per inserimento dati nella struct
-                for (int i = 0; i < strings.Length; i++)
-                {
-                    Indici[i].Nome = strings[i].Split(';')[0];
-                    Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
-                }
+            // Ciclo for per inserimento dati nella struct
+            for (int i = 0; i < strings.Length; i++)
+            {
+                Indici[i].Nome = strings[i].Split(';')[0];
+                Indici[i].Indice = int.Parse(strings[i].Split(';')[1]);
             }
 
             Percorso_File = new FileStream("Prodotti.dat", FileMode.Open, FileAccess.ReadWrite);
@@ -235,12 +233,5 @@ namespace Accesso_Diretto_File
                 // Caso inserisce qualcosa in entrambi oppure non inserisce nulla
             }
         }
-        /* array di struct che contiene nome prodotto e numero prodotto 
-         * -ordinato per ricerca binaria
-         * -di 100 elementi perchè abbiamo 100 record
-         * -bisogna aver un numero per indicare quali sono gli elementi validi nei 100 dell'array
-         * -e poi si salva su file alla chiusura del file 
-         * -alla apertura si riempe di nuovo l'array di struct
-         */
     }
 }
