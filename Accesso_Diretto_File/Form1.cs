@@ -45,17 +45,17 @@ namespace Accesso_Diretto_File
 
         public void Reset_File(FileStream Percorso_File, string Riga_Vuoto, string Dati_Vuoto, byte[] Riga_Binario)
         {
-            BinaryWriter Bw = new BinaryWriter(Percorso_File);
             // Creo riga con dati vuoti
             Riga_Vuoto = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
             // Trasformo riga in binario
             Riga_Binario = Encoding.Default.GetBytes(Riga_Vuoto);
             // Stampo 100 righe nel file
+            File_W.BaseStream.Seek(0, 0);
+
             for (int i = 1; i <= Max_Record; i++)
             {
-                Bw.Write(Riga_Binario);
+                File_W.Write(Riga_Binario);
             }
-            Bw.Close();
         }
 
         public int Ricerca_Binaria(Dati[] array, int lunghezza, string elemento)
@@ -91,7 +91,9 @@ namespace Accesso_Diretto_File
             {
                 // apre il file 'prodotti.dat' creandolo e lo chiude
                 FileStream File = new FileStream("Prodotti.dat", FileMode.Create, FileAccess.ReadWrite);
+                File_W = new BinaryWriter(File);
                 Reset_File(File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File_W = null;
                 File.Close();
 
                 // apre il file 'record.txt' e lo svuota aprendolo il truncate
