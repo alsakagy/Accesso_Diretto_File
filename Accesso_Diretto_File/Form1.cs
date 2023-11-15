@@ -105,7 +105,9 @@ namespace Accesso_Diretto_File
             {
                 // apre il file 'prodotti.dat' creandolo e lo chiude
                 FileStream File = new FileStream("Prodotti.dat", FileMode.Create, FileAccess.ReadWrite);
+                File_W = new BinaryWriter(File);
                 Reset_File(File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
+                File_W = null;
                 File.Close();
 
                 // apre il file 'record.txt' creandolo e lo chiude
@@ -117,7 +119,7 @@ namespace Accesso_Diretto_File
             {
                 // apre il file 'prodotti.dat' e il reader
                 FileStream File = new FileStream("Prodotti.dat", FileMode.Open, FileAccess.ReadWrite);
-                BinaryReader Br = new BinaryReader(File);
+                File_R = new BinaryReader(File);
 
                 // apre il file 'record.txt' creandolo
                 FileStream Files = new FileStream("Record.txt", FileMode.Create, FileAccess.ReadWrite);
@@ -128,10 +130,10 @@ namespace Accesso_Diretto_File
                 for (int i = 1; i <= Max_Record; i++)
                 {
                     // Leggi il record i - 1
-                    Br.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
+                    File_R.BaseStream.Seek(((i) - 1) * Lunghezza_Record, 0);
 
                     // Leggi del record i primi 32 byte che comprendono il controllo a cancellazione logica e il nome
-                    Leggi_Record = Br.ReadBytes(32);
+                    Leggi_Record = File_R.ReadBytes(32);
 
                     // Scrivo nella struct solo i dati dei record non vuoti
                     if (Leggi_Record[1] != '@')
@@ -146,7 +148,7 @@ namespace Accesso_Diretto_File
                         Numero_Prodotti++;
                     }
                 }
-                Br.Close();
+                File_R = null;
                 File.Close();
             }
 
@@ -187,6 +189,7 @@ namespace Accesso_Diretto_File
                         {
                             // Array per il record letto 
                             byte[] Leggi_Record;
+                            string Record = "";
 
                             // Variabili bool e int
                             bool C_Nome = false;
@@ -204,6 +207,7 @@ namespace Accesso_Diretto_File
 
                                 // Leggi Nome prodotto fino a che è uguale a @ quindi vuoto
                                 Leggi_Record = File_R.ReadBytes(64);
+                                Record = Encoding.Default.GetString(Leggi_Record);
 
                                 // Controllo se esistente o no nel file
                                 if (Indici[i - 1].Nome == Nome)
@@ -212,7 +216,7 @@ namespace Accesso_Diretto_File
                                     {
                                         C_Nome = true;
                                         j = i;
-                                        Quantità = int.Parse(Encoding.Default.GetString(Leggi_Record, 62, 2));
+                                        Quantità = int.Parse(Record.Substring(62, 2));
                                         break;
                                     }
                                 }
@@ -231,7 +235,7 @@ namespace Accesso_Diretto_File
                             if (C_Nome == true)
                             {
                                 // Conversione in binario dei dati
-                                Riga = $"{Quantità + 1}".PadRight(2);
+                                Riga = $"{Record.Substring(0, 61)}{Quantità + 1}".PadRight(2);
                                 Riga_Binario = Encoding.Default.GetBytes(Riga);
 
                                 // Inserimento nel file
@@ -319,76 +323,108 @@ namespace Accesso_Diretto_File
         private void Resetta_File_Click(object sender, EventArgs e)
         {
             Reset_File(Percorso_File, Riga_Vuoto, Dati_Vuoto, Riga_Binario);
-            // apre il file 'record.txt' e lo svuota aprendolo il truncate
             FileStream Files = new FileStream("Record.txt", FileMode.Truncate, FileAccess.ReadWrite);
             Files.Close();
+            Array.Clear(Indici, 0, 100);
             MessageBox.Show("hai resettato il file prodotti, perciò e stato resettato anche il file degli indici");
         }
 
         private void Ricerca_Prodotti_Click(object sender, EventArgs e)
         {
-            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Ricerca_Prodotto.Text);
-
-            if(ricerca == -1)
+            if(Numero_Prodotti > 0)
             {
-                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
-                Ricerca_Prodotto.Text = "";
-            }
-            else
-            {
-                byte[] Leggi_Record;
-                string Record;
+                int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Ricerca_Prodotto.Text);
 
-                // Leggi il record del prodotto ricercato
-                File_R.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
-
-                // leggo il record (lungo 64)
-                Leggi_Record = File_R.ReadBytes(64);
-                Record = Encoding.Default.GetString(Leggi_Record);
-
-                if (Record[0] != '|')
+                if(ricerca == -1)
                 {
                     MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
                     Ricerca_Prodotto.Text = "";
                 }
                 else
                 {
-                    MessageBox.Show($"Nome Prodotto:    {Record.Substring(1, 31).TrimEnd(' ')}\nPrezzo Prodotto:    {Record.Substring(32, 30).TrimEnd(' ')}\nQuantità:   {Record.Substring(62, 2)}");
-                    Ricerca_Prodotto.Text = "";
+                    byte[] Leggi_Record;
+                    string Record;
+
+                    // Leggi il record del prodotto ricercato
+                    File_R.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                    // leggo il record (lungo 64)
+                    Leggi_Record = File_R.ReadBytes(64);
+                    Record = Encoding.Default.GetString(Leggi_Record);
+
+                    if (Record[0] != '|')
+                    {
+                        MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                        Ricerca_Prodotto.Text = "";
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Nome Prodotto:    {Record.Substring(1, 31).TrimEnd(' ')}\nPrezzo Prodotto:    {Record.Substring(32, 30).TrimEnd(' ')}\nQuantità:   {Record.Substring(62, 2)}");
+                        Ricerca_Prodotto.Text = "";
+                    }
                 }
+            }
+            else
+            {
+                MessageBox.Show("non ci sono prodotti al momento, aggiungili e riprova");
+                Ricerca_Prodotto.Text = "";
             }
         }
 
         private void Modifica_File_Click(object sender, EventArgs e)
         {
-            string Prodotto_Modifica = Interaction.InputBox("Inserisci il nome del prodotto che vuoi eliminare");
-
-            int ricerca_Modifica = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Modifica);
-
-            if (ricerca_Modifica == -1)
+            if (Numero_Prodotti > 0)
             {
-                // messaggio errore
-                MessageBox.Show("il prodotto ricercato da modificare non esiste, inserisci un prodotto esistente e riprova");
+                string Prodotto_Modifica = Interaction.InputBox("Inserisci il nome del prodotto che vuoi eliminare");
+
+                ricerca_Modifica = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Modifica);
+
+                if (ricerca_Modifica == -1)
+                {
+                    // messaggio errore
+                    MessageBox.Show("il prodotto ricercato da modificare non esiste, inserisci un prodotto esistente e riprova");
+                }
+                else
+                {
+                    byte[] Leggi_Record;
+                    string Record;
+
+                    // Leggi il record del prodotto ricercato
+                    File_R.BaseStream.Seek(((Indici[ricerca_Modifica].Indice) - 1) * Lunghezza_Record, 0);
+
+                    // leggo il record (lungo 64)
+                    Leggi_Record = File_R.ReadBytes(64);
+                    Record = Encoding.Default.GetString(Leggi_Record);
+
+                    if (Record[0] != '|')
+                    {
+                        MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                    }
+                    else
+                    {
+                        // instruzioni
+                        MessageBox.Show("ora inserisci il nuovo nome e/o prezzo negli spazi dedicati");
+
+                        // Disattivo i campi non utili
+                        Aggiungi.Enabled = false;
+                        Resetta_File.Enabled = false;
+                        Modifica_File.Enabled = false;
+                        Cancellazione_Fisica.Enabled = false;
+                        Cancellazione_Logica.Enabled = false;
+                        Prodotto_Cancellare.Enabled = false;
+                        Recupera_Prodotto.Enabled = false;
+                        Prodotto_Recuperare.Enabled = false;
+                        Ricerca_Prodotti.Enabled = false;
+                        Ricerca_Prodotto.Enabled = false;
+
+                        // rendo utilizzabile tasto di conferma
+                        Conferma.Visible = true;
+                    }
+                }
             }
             else
             {
-                // instruzioni
-                MessageBox.Show("ora inserisci il nuovo nome e/o prezzo negli spazi dedicati");
-
-                // Disattivo i campi non utili
-                Aggiungi.Enabled = false;
-                Resetta_File.Enabled = false;
-                Modifica_File.Enabled = false;
-                Cancellazione_Fisica.Enabled = false;
-                Cancellazione_Logica.Enabled = false;
-                Prodotto_Cancellare.Enabled = false;
-                Recupera_Prodotto.Enabled = false;
-                Prodotto_Recuperare.Enabled = false;
-                Ricerca_Prodotti.Enabled = false;
-                Ricerca_Prodotto.Enabled = false;
-
-                // rendo utilizzabile tasto di conferma
-                Conferma.Visible = true;
+                MessageBox.Show("non ci sono prodotti al momento, aggiungili e riprova");
             }
         }
 
@@ -407,98 +443,121 @@ namespace Accesso_Diretto_File
 
         private void Cancellazione_Logica_Click(object sender, EventArgs e)
         {
-            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
-
-            if (ricerca == -1)
+            if (Numero_Prodotti > 0)
             {
-                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
-                Prodotto_Cancellare.Text = "";
+                int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
+
+                if (ricerca == -1)
+                {
+                    MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                    Prodotto_Cancellare.Text = "";
+                }
+                else
+                {
+                    // mi posiziono per la scrittura
+                    File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                    // sovrascrivo il carattere identificatore
+                    File_W.Write(Encoding.Default.GetBytes("%"));
+
+                    // svuoto casella di testo
+                    Prodotto_Cancellare.Text = "";
+
+                    // messaggio di avviso
+                    MessageBox.Show("Prodotto cancellato logicamente");
+                }
             }
             else
             {
-                // mi posiziono per la scrittura
-                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
-
-                // sovrascrivo il carattere identificatore
-                File_W.Write(Encoding.Default.GetBytes("%"));
-
-                // svuoto casella di testo
+                MessageBox.Show("non ci sono prodotti al momento, aggiungili e riprova");
                 Prodotto_Cancellare.Text = "";
-
-                // messaggio di avviso
-                MessageBox.Show("Prodotto cancellato logicamente");
             }
         }
 
         private void Recupera_Prodotto_Click(object sender, EventArgs e)
         {
-            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Recuperare.Text);
-
-            if (ricerca == -1)
+            if (Numero_Prodotti > 0)
             {
-                MessageBox.Show("il prodotto in questione non è mai esistito o non può essere recuperato");
-                Prodotto_Recuperare.Text = "";
+                int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Recuperare.Text);
+
+                if (ricerca == -1)
+                {
+                    MessageBox.Show("il prodotto in questione non è mai esistito o non può essere recuperato");
+                    Prodotto_Recuperare.Text = "";
+                }
+                else
+                {
+                    // mi posiziono per la scrittura
+                    File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                    // sovrascrivo il carattere identificatore
+                    File_W.Write(Encoding.Default.GetBytes("|"));
+
+                    // svuoto casella di testo
+                    Prodotto_Recuperare.Text = "";
+
+                    // messaggio di avviso
+                    MessageBox.Show("Prodotto recuperato");
+                }
             }
             else
             {
-                // mi posiziono per la scrittura
-                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
-
-                // sovrascrivo il carattere identificatore
-                File_W.Write(Encoding.Default.GetBytes("|"));
-
-                // svuoto casella di testo
+                MessageBox.Show("non ci sono prodotti al momento, aggiungili e riprova");
                 Prodotto_Recuperare.Text = "";
-
-                // messaggio di avviso
-                MessageBox.Show("Prodotto recuperato");
             }
         }
 
         private void Cancellazione_Fisica_Click(object sender, EventArgs e)
         {
-            int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
-
-            if (ricerca == -1)
+            if (Numero_Prodotti > 0)
             {
-                MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
-                Prodotto_Cancellare.Text = "";
+                int ricerca = Ricerca_Binaria(Indici, Numero_Prodotti, Prodotto_Cancellare.Text);
+
+                if (ricerca == -1)
+                {
+                    MessageBox.Show("il prodotto ricercato non esiste, inserisci un prodotto esistente e riprova");
+                    Prodotto_Cancellare.Text = "";
+                }
+                else
+                {
+                    // mi posiziono per la scrittura
+                    File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
+
+                    // Impostazione riga vuota
+                    Riga = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
+
+                    // Trasformazione in binario
+                    Riga_Binario = Encoding.Default.GetBytes(Riga);
+
+                    // Sovrascrittura
+                    File_W.Write(Riga_Binario);
+
+                    // for che sposta tutti gli elementi della struct di uno
+                    for(int i = ricerca; i < Numero_Prodotti - 1; i++)
+                    {
+                        Indici[i].Nome = Indici[i + 1].Nome;
+                        Indici[i].Indice = Indici[i + 1].Indice;
+                    }
+
+                    // Diminuisco il numero di prodotti inseriti
+                    Numero_Prodotti--;
+
+                    // svuoto casella di testo
+                    Prodotto_Cancellare.Text = "";
+
+                    // messaggio di avviso
+                    MessageBox.Show("Prodotto Cancellato fisicamente");
+                }
             }
             else
             {
-                // mi posiziono per la scrittura
-                File_W.BaseStream.Seek(((Indici[ricerca].Indice) - 1) * Lunghezza_Record, 0);
-
-                // Impostazione riga vuota
-                Riga = Dati_Vuoto + Dati_Vuoto.PadRight(31) + Dati_Vuoto.PadRight(30) + Dati_Vuoto.PadRight(2);
-
-                // Trasformazione in binario
-                Riga_Binario = Encoding.Default.GetBytes(Riga);
-
-                // Sovrascrittura
-                File_W.Write(Riga_Binario);
-
-                // for che sposta tutti gli elementi della struct di uno
-                for(int i = ricerca; i < Numero_Prodotti - 1; i++)
-                {
-                    Indici[i].Nome = Indici[i + 1].Nome;
-                    Indici[i].Indice = Indici[i + 1].Indice;
-                }
-
-                // Diminuisco il numero di prodotti inseriti
-                Numero_Prodotti--;
-
-                // svuoto casella di testo
+                MessageBox.Show("non ci sono prodotti al momento, aggiungili e riprova");
                 Prodotto_Cancellare.Text = "";
-
-                // messaggio di avviso
-                MessageBox.Show("Prodotto Cancellato fisicamente");
             }
         }
 
         private void Conferma_Click(object sender, EventArgs e)
         {
-
             // mi posiziono per la lettura
             File_R.BaseStream.Seek(((Indici[ricerca_Modifica].Indice) - 1) * Lunghezza_Record, 0);
 
@@ -520,9 +579,47 @@ namespace Accesso_Diretto_File
                 // sovrascrivo il record
                 File_W.Write(Riga_Binario);
 
+                // for per la "rimozione momentanea" dalla struct del prodotti
+                for(int i = Numero_Prodotti - 1; i > ricerca_Modifica; i--)
+                {
+                    Indici[i - 1].Nome = Indici[i].Nome;
+                    Indici[i - 1].Indice = Indici[i].Indice;
+                }
+
+                // while che lo inserisce di nuovo in modo alfabetico
+                int y = Numero_Prodotti - 1;
+                bool Trovato = false;
+                while (Trovato == false)
+                {
+                    if (y == 0)
+                    {
+                        Indici[y].Nome = Nome_Prodotto.Text;
+                        Indici[y].Indice = Indici[ricerca_Modifica].Indice;
+                        Trovato = true;
+                    }
+                    else
+                    {
+                        if (Nome.CompareTo(Indici[y - 1].Nome) < 0)
+                        {
+                            Indici[y].Nome = Indici[y - 1].Nome;
+                            Indici[y].Indice = Indici[y - 1].Indice;
+                        }
+                        else
+                        {
+                            Indici[y].Nome = Nome_Prodotto.Text;
+                            Indici[y].Indice = Indici[ricerca_Modifica].Indice;
+                            Trovato = true;
+                        }
+                        y--;
+                    }
+                }
+
                 // svuoto le caselle di testo
                 Nome_Prodotto.Text = "";
                 Prezzo_Prodotto.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto modificato");
             }
             else if(Nome_Prodotto.Text != "" && Prezzo_Prodotto.Text == "")
             {
@@ -535,8 +632,46 @@ namespace Accesso_Diretto_File
                 // sovrascrivo il record
                 File_W.Write(Riga_Binario);
 
+                // for per la "rimozione momentanea" dalla struct del prodotti
+                for (int i = Numero_Prodotti - 1; i > ricerca_Modifica; i--)
+                {
+                    Indici[i - 1].Nome = Indici[i].Nome;
+                    Indici[i - 1].Indice = Indici[i].Indice;
+                }
+
+                // while che lo inserisce di nuovo in modo alfabetico
+                int y = Numero_Prodotti - 1;
+                bool Trovato = false;
+                while (Trovato == false)
+                {
+                    if (y == 0)
+                    {
+                        Indici[y].Nome = Nome_Prodotto.Text;
+                        Indici[y].Indice = Indici[ricerca_Modifica].Indice;
+                        Trovato = true;
+                    }
+                    else
+                    {
+                        if (Nome_Prodotto.Text.CompareTo(Indici[y - 1].Nome) < 0)
+                        {
+                            Indici[y].Nome = Indici[y - 1].Nome;
+                            Indici[y].Indice = Indici[y - 1].Indice;
+                        }
+                        else
+                        {
+                            Indici[y].Nome = Nome_Prodotto.Text;
+                            Indici[y].Indice = Indici[ricerca_Modifica].Indice;
+                            Trovato = true;
+                        }
+                        y--;
+                    }
+                }
+
                 // svuoto le caselle di testo
                 Nome_Prodotto.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto modificato");
             }
             else if (Prezzo_Prodotto.Text != "" && Nome_Prodotto.Text == "")
             {
@@ -551,6 +686,9 @@ namespace Accesso_Diretto_File
 
                 // svuoto le caselle di testo
                 Prezzo_Prodotto.Text = "";
+
+                // messaggio di avviso
+                MessageBox.Show("Prodotto modificato");
             }
             // Messaggio errore per mancato inserimento dati
             else
